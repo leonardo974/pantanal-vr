@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pantanal VR 360</title>
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #000;
+      font-family: sans-serif;
+    }
+    #tela-inicio {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.88);
+      z-index: 999999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    #btn-entrar {
+      padding: 18px 40px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #fff;
+      background: #2e7d32;
+      border: 2px solid #4ade80;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+    }
+  </style>
+</head>
+<body>
+
+  <div id="tela-inicio">
+    <h1 style="color: #4ade80; margin-bottom: 20px;">Experiência VR 360° Pantanal</h1>
+    <button id="btn-entrar">CLIQUE PARA ENTRAR NO VR</button>
+  </div>
+
+  <a-scene embedded style="width: 100vw; height: 100vh;">
+    <a-assets timeout="60000">
+      <audio 
+        id="voz-animal" 
+        src="https://actions.google.com/sounds/v1/animals/tiger_growling.ogg" 
+        crossorigin="anonymous" 
+        preload="auto">
+      </audio>
+    </a-assets>
+
+    <a-videosphere id="esfera-video" rotation="0 -90 0"></a-videosphere>
+
+    <a-entity cursor="rayOrigin: mouse" raycaster="objects: .clicavel"></a-entity>
+    <a-entity laser-controls="hand: right" raycaster="objects: .clicavel"></a-entity>
+    <a-entity laser-controls="hand: left" raycaster="objects: .clicavel"></a-entity>
+
+    <a-sphere 
+      id="hotspot-animal" 
+      class="clicavel" 
+      position="1.5 0.5 -4" 
+      radius="0.45" 
+      material="color: #facc15; emissive: #ca8a04; emissiveIntensity: 0.6; opacity: 0.85; transparent: true">
+    </a-sphere>
+
+    <a-entity id="painel-info" position="1.5 0.5 -3.5" visible="false">
+      <a-plane color="#111111" opacity="0.9" width="2.4" height="1.5"></a-plane>
+      <a-plane color="#4ade80" material="wireframe: true; wireframeLinewidth: 2" width="2.4" height="1.5" position="0 0 0.005"></a-plane>
+      <a-text 
+        value="Onca-Pintada\n\nMaior felino das Americas.\nHabita as margens dos rios do Pantanal." 
+        align="center" 
+        width="2.2" 
+        position="0 0.25 0.01" 
+        color="#ffffff">
+      </a-text>
+      
+      <a-plane id="btn-continuar" class="clicavel" color="#2e7d32" width="1.1" height="0.35" position="0 -0.45 0.02">
+        <a-text value="Continuar" align="center" width="2.2" position="0 0 0.01" color="#ffffff"></a-text>
+      </a-plane>
+    </a-entity>
+  </a-scene>
+
+  <script>
+    const telaInicio = document.getElementById('tela-inicio');
+    const btnEntrar = document.getElementById('btn-entrar');
+    const esferaVideo = document.getElementById('esfera-video');
+    const voz = document.getElementById('voz-animal');
+    const hotspot = document.getElementById('hotspot-animal');
+    const painel = document.getElementById('painel-info');
+    const btnContinuar = document.getElementById('btn-continuar');
+
+    const video = document.createElement('video');
+    video.src = "https://github.com/leonardo974/pantanal-vr/releases/download/v1.0/01.mp4";
+    video.crossOrigin = "anonymous";
+    video.playsInline = true;
+    video.setAttribute('webkit-playsinline', 'true');
+    video.loop = true;
+    video.preload = "auto";
+
+    btnEntrar.addEventListener('click', () => {
+      btnEntrar.textContent = "A CARREGAR...";
+      btnEntrar.disabled = true;
+
+      video.play().then(() => {
+        esferaVideo.setAttribute('src', video);
+        telaInicio.style.display = 'none';
+      }).catch(() => {
+        video.muted = true;
+        video.play().then(() => {
+          esferaVideo.setAttribute('src', video);
+          telaInicio.style.display = 'none';
+        });
+      });
+    });
+
+    hotspot.addEventListener('click', () => {
+      video.pause();
+      voz.currentTime = 0;
+      voz.play().catch(() => {});
+      painel.setAttribute('visible', 'true');
+      hotspot.setAttribute('visible', 'false');
+    });
+
+    btnContinuar.addEventListener('click', (e) => {
+      e.stopPropagation();
+      voz.pause();
+      painel.setAttribute('visible', 'false');
+      hotspot.setAttribute('visible', 'true');
+      video.play();
+    });
+  </script>
+</body>
+</html>
